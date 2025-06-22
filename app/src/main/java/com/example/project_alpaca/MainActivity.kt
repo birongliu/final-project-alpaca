@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -28,25 +29,53 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.project_alpaca.data.CredentialsManager
+import com.example.project_alpaca.ui.HomeScreen
+import com.example.project_alpaca.ui.LoginScreen
+import com.example.project_alpaca.ui.common.Logo
 import com.example.project_alpaca.ui.theme.LogoOrange
 import com.example.project_alpaca.ui.theme.LogoYellow
 import com.example.project_alpaca.ui.theme.ProjectalpacaTheme
 import com.example.project_alpaca.ui.theme.RoyalBlue
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Hardcode user credentials if they don't exist
+        val credentialsManager = CredentialsManager(applicationContext)
+        if (!credentialsManager.areCredentialsStored()) {
+            credentialsManager.saveCredentials("admin", "password")
+        }
+
         enableEdgeToEdge()
         setContent {
             ProjectalpacaTheme {
-                LandingScreen()
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "loading") {
+                    composable("loading") { LoadingScreen(navController = navController) }
+                    composable("login") { LoginScreen(navController = navController) }
+                    composable("home") { HomeScreen() }
+                }
             }
         }
     }
 }
 
 @Composable
-fun LandingScreen() {
+fun LoadingScreen(navController: NavController) {
+    LaunchedEffect(Unit) {
+        delay(3000)
+        navController.navigate("login") {
+            popUpTo("loading") { inclusive = true }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -68,50 +97,13 @@ fun LandingScreen() {
                 )
             )
         }
-        Text(
-            text = "Project Search",
-            style = TextStyle(
-                fontSize = 18.sp,
-                color = Color.White.copy(alpha = 0.8f)
-            ),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp)
-        )
     }
-}
-
-@Composable
-fun Logo() {
-    Box(modifier = Modifier.size(150.dp)) {
-        Column {
-            Row {
-                LogoSquare(color = LogoYellow)
-                LogoSquare(color = LogoOrange, rotation = -15f, modifier = Modifier.offset(x = (-8).dp, y = 8.dp))
-            }
-            Row(modifier = Modifier.padding(top = 4.dp)) {
-                LogoSquare(color = LogoYellow)
-                LogoSquare(color = LogoYellow)
-            }
-        }
-    }
-}
-
-@Composable
-fun LogoSquare(color: Color, rotation: Float = 0f, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier
-            .size(70.dp)
-            .rotate(rotation),
-        color = color,
-        shape = RoundedCornerShape(12.dp)
-    ) {}
 }
 
 @Preview(showBackground = true)
 @Composable
-fun LandingScreenPreview() {
+fun LoadingScreenPreview() {
     ProjectalpacaTheme {
-        LandingScreen()
+        LoadingScreen(navController = rememberNavController())
     }
 }
