@@ -3,6 +3,7 @@ package com.example.project_alpaca.data
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import androidx.core.content.edit
 
 class CredentialsManager(context: Context) {
 
@@ -17,11 +18,10 @@ class CredentialsManager(context: Context) {
     )
 
     fun saveCredentials(username: String, password: String) {
-        with(sharedPreferences.edit()) {
+        sharedPreferences.edit {
             // In a real production app, you should hash and salt the password before storing it.
             putString("username", username)
             putString("password", password)
-            apply()
         }
     }
 

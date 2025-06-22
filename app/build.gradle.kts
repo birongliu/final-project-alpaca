@@ -53,7 +53,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation("androidx.navigation:navigation-compose:2.8.0-beta06")
+    implementation("androidx.navigation:navigation-compose:2.9.0")
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
     implementation("androidx.browser:browser:1.8.0")
     implementation("androidx.security:security-crypto:1.0.0")
