@@ -6,8 +6,10 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Include general shared preferences -->
+    <include domain="sharedpref" path="."/>
+    <!-- Exclude encrypted preferences containing sensitive data -->
+    <exclude domain="sharedpref" path="secret_user_prefs.xml"/>
+    <exclude domain="sharedpref" path="accessibility_prefs.xml"/>
+    <exclude domain="sharedpref" path="tasks_prefs.xml"/>
 </full-backup-content>

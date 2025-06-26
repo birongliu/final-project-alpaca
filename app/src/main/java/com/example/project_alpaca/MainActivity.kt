@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,32 +27,98 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+import com.example.project_alpaca.data.AccessibilityManager
 import com.example.project_alpaca.data.CredentialsManager
+import com.example.project_alpaca.data.LocalAccessibilityManager
+import com.example.project_alpaca.data.TaskManager
+import com.example.project_alpaca.data.LocalTaskManager
+import com.example.project_alpaca.ui.AccessibilitySettingsScreen
 import com.example.project_alpaca.ui.HomeScreen
 import com.example.project_alpaca.ui.LoginScreen
 import com.example.project_alpaca.ui.common.Logo
+import com.example.project_alpaca.ui.theme.AccessibilityTheme
 import com.example.project_alpaca.ui.theme.ProjectalpacaTheme
 import com.example.project_alpaca.ui.theme.RoyalBlue
 import kotlinx.coroutines.delay
+import com.example.project_alpaca.ui.DailyTasksScreen
+import com.example.project_alpaca.ui.LearningScreen
+import com.example.project_alpaca.data.LocalLearningManager
+import com.example.project_alpaca.data.LearningManager
+import com.example.project_alpaca.ui.ChatScreen
+import com.example.project_alpaca.ui.ProgressScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Hardcode user credentials if they don't exist
+        // Initialize managers
         val credentialsManager = CredentialsManager(applicationContext)
+        val accessibilityManager = AccessibilityManager(applicationContext)
+        val taskManager = TaskManager(applicationContext)
+        val learningManager = LearningManager(applicationContext)
+        
         if (!credentialsManager.areCredentialsStored()) {
-            credentialsManager.saveCredentials("admin", "password")
+            credentialsManager.saveCredentials("jacob", "password")
         }
 
         enableEdgeToEdge()
         setContent {
-            ProjectalpacaTheme {
-                val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "loading") {
-                    composable("loading") { LoadingScreen(navController = navController) }
-                    composable("login") { LoginScreen(navController = navController) }
-                    composable("home") { HomeScreen() }
+            CompositionLocalProvider(
+                LocalAccessibilityManager provides accessibilityManager,
+                LocalTaskManager provides taskManager,
+                LocalLearningManager provides learningManager
+            ) {
+                ProjectalpacaTheme {
+                    AccessibilityTheme {
+                        val navController = rememberNavController()
+                        NavHost(navController = navController, startDestination = "loading") {
+                            composable("loading") { 
+                                LoadingScreen(navController = navController)
+                            }
+                            composable("login") { 
+                                LoginScreen(navController = navController)
+                            }
+                            composable(
+                                route = "home/{username}",
+                                arguments = listOf(navArgument("username") { type = NavType.StringType })
+                            ) { backStackEntry ->
+                                val username = backStackEntry.arguments?.getString("username") ?: "User"
+                                HomeScreen(
+                                    userName = username,
+                                    onAccessibilitySettingsClick = {
+                                        navController.navigate("accessibility_settings")
+                                    },
+                                    onDailyChecklistClick = {
+                                        navController.navigate("daily_tasks")
+                                    },
+                                    onLearningDashboardClick = {
+                                        navController.navigate("learning")
+                                    },
+                                    onMyProgressClick = {
+                                        navController.navigate("progress")
+                                    },
+                                    navController = navController
+                                )
+                            }
+                            composable("accessibility_settings") {
+                                AccessibilitySettingsScreen(navController = navController)
+                            }
+                            composable("daily_tasks") {
+                                DailyTasksScreen(navController = navController)
+                            }
+                            composable("learning") {
+                                LearningScreen(navController = navController)
+                            }
+                            composable("chat") {
+                                ChatScreen(navController = navController)
+                            }
+                            composable("progress") {
+                                ProgressScreen(navController = navController)
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -50,7 +52,10 @@ fun LoginScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(RoyalBlue),
+            .background(RoyalBlue)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Login Screen"
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -64,7 +69,10 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 "NextStep",
-                style = TextStyle(fontSize = 42.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                style = TextStyle(fontSize = 42.sp, fontWeight = FontWeight.Bold, color = Color.White),
+                modifier = Modifier.semantics {
+                    contentDescription = "NextStep App"
+                }
             )
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -76,14 +84,23 @@ fun LoginScreen(navController: NavController) {
                             animationSpec = tween(durationMillis = 500, delayMillis = 200)
                         )
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.semantics(mergeDescendants = true) {
+                        contentDescription = "Login Form"
+                    }
+                ) {
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
                         label = { Text("Username") },
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                contentDescription = "Username input field, ${if (username.isEmpty()) "empty" else "contains text"}"
+                            },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.White.copy(alpha = 0.2f),
                             unfocusedContainerColor = Color.White.copy(alpha = 0.2f),
@@ -105,7 +122,11 @@ fun LoginScreen(navController: NavController) {
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                contentDescription = "Password input field, ${if (password.isEmpty()) "empty" else "contains text"}"
+                            },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.White.copy(alpha = 0.2f),
                             unfocusedContainerColor = Color.White.copy(alpha = 0.2f),
@@ -124,7 +145,7 @@ fun LoginScreen(navController: NavController) {
                     Button(
                         onClick = {
                             if (credentialsManager.checkCredentials(username, password)) {
-                                navController.navigate("home") {
+                                navController.navigate("home/$username") {
                                     popUpTo("login") { inclusive = true }
                                 }
                             } else {
@@ -133,7 +154,10 @@ fun LoginScreen(navController: NavController) {
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
+                            .height(50.dp)
+                            .semantics {
+                                contentDescription = "Login button"
+                            },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                     ) {
@@ -143,7 +167,10 @@ fun LoginScreen(navController: NavController) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = it,
-                            color = MaterialTheme.colorScheme.error
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Error: $it"
+                            }
                         )
                     }
                 }
